@@ -49,7 +49,8 @@ All features had to be build with the following parameters in mind:
 ```
 - If the file were empty, a message must be shown, informing the user of this condition;
 
-- Read the frist line of the file (first transaction) to determine the transaction date in this specific file;
+- Read the frist line of the file (first transaction) to determine the transaction date in 
+this specific file;
 
 - Any transaction made after the first one in in the file, it must be ignored;
 
