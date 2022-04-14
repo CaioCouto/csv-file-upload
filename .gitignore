@@ -3,5 +3,6 @@ prisma/migrations
 *.csv
 *.db
 
+!transacoes-2022-01-02.csv
 # Keep environment variables out of version control
 .env
