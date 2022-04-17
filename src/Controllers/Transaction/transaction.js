@@ -18,6 +18,7 @@ class TransactionController {
         } catch (error) {
             console.log(error);
             deleteCSV(filename);
+            return res.status(500);
         }
     }
     
