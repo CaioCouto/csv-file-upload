@@ -85,7 +85,7 @@
                 headers: headers,
                 mode: 'cors'
             }
-            fetch(`http://localhost:3333/transactions`, init)
+            fetch(`http://localhost:3333/imports`, init)
             .then(resp => resp.json().then(response => {
                 if (response.length === 0) {
                     transactions__table.style.display = 'none';

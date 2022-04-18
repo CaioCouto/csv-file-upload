@@ -11,7 +11,6 @@ class Transactions {
         this.destinationAccount = destinationAccount;
         this.amount = amount;
         this.datetime = new Date(datetime);
-        this.importedAt = new Date();
     }
 
     register() {
@@ -24,8 +23,7 @@ class Transactions {
                 destinationAgency: this.destinationAgency,
                 destinationAccount: this.destinationAccount,
                 amount: this.amount,
-                datetime: this.datetime,
-                importedAt: this.importedAt
+                datetime: this.datetime
             }
         });
     }

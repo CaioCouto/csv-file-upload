@@ -16,9 +16,9 @@ function readCSV(filename) {
 
 describe ('Test File Upload Routine', () => {
     const getResponseUrlParams = url => url.split('?')[1];
-    const filename = 'transacoes-2022-01-02.csv';
-
+    
     it('Upload File', done => {
+        const filename = 'transacoes-2022-01-01.csv';
         const form = new FormData();
         form.append('transactions', readCSV(filename), filename);
         axios.post(
@@ -37,6 +37,26 @@ describe ('Test File Upload Routine', () => {
     });
     
     it('Upload Duplicated File', done => {
+        const filename = 'transacoes-2022-01-01.csv';
+        const form = new FormData();
+        form.append('transactions', readCSV(filename), filename);
+        axios.post(
+            'http://localhost:3333/upload',
+            form,
+            {
+                headers: {
+                    ...form.getHeaders()
+                }
+            }
+        )
+        .then(resp => {
+            expect(getResponseUrlParams(resp.request.path)).toBe('duplicate=1');
+            done();
+        });
+    });
+    
+    it('Upload Duplicated Data', done => {
+        const filename = 'transacoesDuplicada2022-01-01.csv';
         const form = new FormData();
         form.append('transactions', readCSV(filename), filename);
         axios.post(

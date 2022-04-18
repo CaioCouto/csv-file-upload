@@ -1,8 +1,8 @@
-const { Transactions } = require('../../Models');
-const { csvToObject, deleteCSV, printTransaction } = require("../../utils");
+const { Transactions, Imports } = require('../../Models');
+const { csvToObject, deleteCSV, printTransaction, getTransactionTime } = require("../../utils");
 
 class TransactionController {    
-    static register(req, res, next) {
+    static async register(req, res, next) {
         const { filename } = req.query;
         try {
             const data = csvToObject(filename);
@@ -10,6 +10,9 @@ class TransactionController {
                 console.log('Não existem transações registradas no arquivo enviado.');
                 return res.redirect('/?valid=0');
             }
+
+            const imports = new Imports(getTransactionTime(data[0].datetime));            
+            await imports.register();
             data.forEach(async transaction => {
                 printTransaction(transaction);
                 await transaction.register();
@@ -18,6 +21,9 @@ class TransactionController {
         } catch (error) {
             console.log(error);
             deleteCSV(filename);
+            if(error.code === 'P2002') {
+                return res.redirect(`/?duplicate=1`);
+            }
             return res.status(500);
         }
     }
