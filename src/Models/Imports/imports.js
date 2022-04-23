@@ -31,6 +31,22 @@ class Imports {
             }
         });
     }
+    
+    static async listById(id) {
+        return await imports.findUnique({
+            where: {
+                id:id
+            },
+            include: {
+                user: {
+                    select: {
+                        name: true,
+                        email: true
+                    }
+                }
+            }
+        });
+    }
 };
 
 module.exports = Imports;

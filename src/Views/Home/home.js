@@ -11,6 +11,10 @@ router.get('/reports', validatesession, (req, res, next) => {
     return res.sendFile(returnTemplatePath('imports'));
 });
 
+router.get('/report/:id', validatesession, (req, res, next) => {
+    return res.sendFile(returnTemplatePath('details'));
+});
+
 router.get('/', (req, res, next) => {
     return res.sendFile(returnTemplatePath('index'));
 });

@@ -13,7 +13,6 @@ function printTransaction(transaction) {
     console.log("Conta de Destino: " + transaction.destinationAccount);
     console.log("Valor: " + transaction.amount);
     console.log("Feita em: " + transaction.datetime.toLocaleString());
-    console.log("Registrada em: " + transaction.importedAt);
     lines();
 }
 

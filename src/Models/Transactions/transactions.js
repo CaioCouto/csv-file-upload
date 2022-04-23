@@ -27,17 +27,18 @@ class Transactions {
             }
         });
     }
-
-    static list() {
+    
+    static list(startDate, endDate) {
         return transactions.findMany({
-            select: {
-                datetime: true,
-                importedAt: true
+            where: {
+                datetime: {
+                    gte: startDate,
+                    lt: endDate
+                }
             },
             orderBy: {
                 datetime: 'desc'
-            },
-            distinct: ['importedAt']
+            }
         });
     }
 };

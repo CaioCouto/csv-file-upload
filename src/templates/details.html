@@ -1,0 +1,209 @@
+<!DOCTYPE
+    html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+        crossorigin="anonymous"
+    >
+    <title>Upload de CSV</title>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-md navbar-light bg-light">
+            <div class="container-fluid">
+                <div class="navbar-nav flex-row gap-2">
+                    <a class="nav-link" href="/reports">Transações</a>
+                    <a class="nav-link" aria-current="page" href="/admin">Usuários</a>
+                </div>
+                <button id="logoutBtn" class="btn btn-danger" type="button">Sair</button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="mb-5">
+            <h1>Detalhes da Importação</h1>
+
+            <article>
+                <div class="mb-3 row">
+                    <label for="importDate" class="col-2 col-form-label">Data da importação</label>
+                    <div class="col-8">
+                        <input type="text" class="form-control" id="importDate" disabled readonly/>
+                    </div>
+                </div>
+                <div class="mb-3 row">
+                    <label for="transactionDate" class="col-2 col-form-label">Data das transações</label>
+                    <div class="col-8">
+                        <input type="text" class="form-control" id="transactionDate" disabled readonly/>
+                    </div>
+                </div>
+                <div class="mb-3 row">
+                    <label for="importedBy" class="col-2 col-form-label">Importado por</label>
+                    <div class="col-8">
+                        <input type="text" class="form-control" id="importedBy" disabled readonly/>
+                    </div>
+                </div>
+            </article>
+        </section>
+
+        <section id="transactions" class="">
+            <h2 id="transactions__title">Transações Importadas</h1>
+        
+            <table id="transactions__table" class="table table-bordered">
+                <thead>
+                    <tr>
+                       <th class="text-center align-middle" colspan="3">Origem</th>
+                       <th class="text-center align-middle" colspan="3">Destino</th>
+                       <th class="text-center align-middle" rowspan="2">Valor</th>
+                    </tr>
+                    <tr>
+                       <th class="text-center align-middle">Banco</th>
+                       <th class="text-center align-middle">Agência</th>
+                       <th class="text-center align-middle">Conta</th>
+                       <th class="text-center align-middle">Banco</th>
+                       <th class="text-center align-middle">Agência</th>
+                       <th class="text-center align-middle">Conta</th>
+                    </tr>
+                </thead>
+                <tbody id="transactions__table-body"></tbody>
+            </table>
+        </section>
+    </main>
+    
+    <script>
+        // Selecting all necessary elements
+        const logoutBtn = document.querySelector('#logoutBtn');
+        const transactions = document.querySelector('#transactions');
+        const transactionsTitle = document.querySelector('#transactions__title');
+        const transactions__table = document.querySelector('#transactions__table');
+    </script>
+
+    <script>
+        // Declaring non-event functions
+        function fillImportDescription(imports) {
+            const importDate = document.querySelector('#importDate');
+            const transactionDate = document.querySelector('#transactionDate');
+            const importedBy = document.querySelector('#importedBy');
+
+            importDate.value = new Date(imports.importedAt).toLocaleString();
+            transactionDate.value = new Date(imports.datetime).toLocaleDateString();
+            importedBy.value = `${imports.user.name} (${imports.user.email})`;
+        }
+
+        function fillTransactionsTable(transactions) {
+            const transactionsTableBody = document.querySelector('#transactions__table-body');
+            
+            transactions.forEach(transaction => {
+                const tr = document.createElement('tr');
+                const tdOriginBank = document.createElement('td');
+                const tdOriginAgency = document.createElement('td');
+                const tdOriginAccount = document.createElement('td');
+                const tdDestinationBank = document.createElement('td');
+                const tdDestinationAgency = document.createElement('td');
+                const tdDestinationAccount = document.createElement('td');
+                const tdValue = document.createElement('td');
+
+                tdOriginBank.textContent = transaction.originBank;
+                tdOriginAgency.textContent = transaction.originAgency;
+                tdOriginAccount.textContent = transaction.originAccount;
+                tdDestinationBank.textContent = transaction.destinationBank;
+                tdDestinationAgency.textContent = transaction.destinationAgency;
+                tdDestinationAccount.textContent = transaction.destinationAccount;
+                tdValue.textContent = 'R$ ' + Number(transaction.amount).toFixed(2);
+
+                tdOriginBank.classList = 'align-middle text-center';
+                tdOriginAgency.classList = 'align-middle text-center';
+                tdOriginAccount.classList = 'align-middle text-center';
+                tdDestinationBank.classList = 'align-middle text-center';
+                tdDestinationAgency.classList = 'align-middle text-center';
+                tdDestinationAccount.classList = 'align-middle text-center';
+                tdValue.classList = 'align-middle text-center';
+
+                tr.appendChild(tdOriginBank);
+                tr.appendChild(tdOriginAgency);
+                tr.appendChild(tdOriginAccount);
+                tr.appendChild(tdDestinationBank);
+                tr.appendChild(tdDestinationAgency);
+                tr.appendChild(tdDestinationAccount);
+                tr.appendChild(tdValue);
+                transactionsTableBody.appendChild(tr);
+            });
+        }
+
+        function getTransactions(datetime) {
+            datetime = datetime.split('T')[0];
+            const init = {
+                method: 'get',
+                mode: 'cors'
+            }
+            fetch(`http://localhost:3333/transactions/${datetime}`, init)
+            .then(resp => resp.json().then(body => {
+                fillTransactionsTable(body);
+            }))
+            .catch(error => console.log(error))
+        } 
+        
+        function getImportById(id) {
+            const headers = { 'Content-Type': 'application/json'};
+            const init = {
+                method:  'get',
+                headers: headers,
+                mode: 'cors'
+            }
+            fetch(`http://localhost:3333/imports/${id}`, init)
+            .then(resp => resp.json().then(body => {
+                fillImportDescription(body);
+                getTransactions(body.datetime);
+            }))
+            .catch(error => console.log(error))
+        } 
+
+        function dataNotValid() {
+            bigWarning.textContent = 'Transações inválidas';
+            smallerWarning.textContent = 'Não há transações registradas.';
+        }
+        
+        function duplicatedData() {
+            bigWarning.textContent = 'Transações inválidas';
+            smallerWarning.textContent = 'O arquivo enviado já foi processado anteriormente.';
+        }
+        
+        function dataIsValid() {
+            bigWarning.textContent = 'Transações salvas com sucesso!';
+            smallerWarning.textContent = '';
+            transactions.style.display = 'block';
+        }
+    </script>
+
+    <script>
+        // Defining window's load event
+        window.onload = () => {
+            const [ importId ] = window.location.pathname.split('/').splice(-1);
+            // getTransactions();
+            getImportById(importId);
+        }
+    </script>
+    
+    <script>
+        // logout event
+        logoutBtn.addEventListener('click', () => {
+            fetch(`http://localhost:3333/users/logout`)
+            .then(resp => {
+                if(resp.status === 200) window.location.replace('/');
+            })
+            .catch(error => console.log(error));
+        })
+    </script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"
+    ></script>
+</body>
+</html>
