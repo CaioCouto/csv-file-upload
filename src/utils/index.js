@@ -1,4 +1,5 @@
 const readCSV = require("./readCSV");
+const sendMail = require("./sendMail");
 const CSVexists = require("./CSVexists");
 const deleteCSV = require("./deleteCSV");
 const getSrcDir = require("./getSrcDir");
@@ -11,6 +12,7 @@ const getUploadDestinationDir = require("./getUploadDestinationDir");
 
 module.exports = {
     readCSV,
+    sendMail,
     CSVexists,
     deleteCSV,
     getSrcDir,

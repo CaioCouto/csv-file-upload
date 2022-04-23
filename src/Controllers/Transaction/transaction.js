@@ -12,17 +12,17 @@ class TransactionController {
             }
 
             const imports = new Imports(getTransactionTime(data[0].datetime));            
-            await imports.register();
+            await imports.register(req.session.user.id);
             data.forEach(async transaction => {
                 printTransaction(transaction);
                 await transaction.register();
             })
-            return res.redirect(`/?valid=1`);
+            return res.redirect(`/imports?valid=1`);
         } catch (error) {
             console.log(error);
             deleteCSV(filename);
             if(error.code === 'P2002') {
-                return res.redirect(`/?duplicate=1`);
+                return res.redirect(`/imports?duplicate=1`);
             }
             return res.status(500);
         }

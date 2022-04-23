@@ -1,0 +1,168 @@
+<!DOCTYPE
+    html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+        crossorigin="anonymous"
+    >
+    <title>Upload de CSV</title>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-md navbar-light bg-light">
+            <div class="container-fluid">
+                <div class="navbar-nav flex-row gap-2">
+                    <a class="nav-link" href="/reports">Transações</a>
+                    <a class="nav-link" aria-current="page" href="/admin">Usuários</a>
+                </div>
+                <button id="logoutBtn" class="btn btn-danger" type="button">Sair</button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="w-75 mb-5">
+            <h1 id="mainText">Enviar transações</h1>
+        
+            <form class="mb-3" method="post" enctype="multipart/form-data" action="upload">
+                <div class="mb-3" id="form__uploadFile">
+                    <label for="formFile" class="form-label">Selecione o arquivo csv desejado</label>
+                    <input class="form-control" type="file" id="formFile" name="transactions" required>      
+                </div>
+
+                <button id="submitButton" type="submit" class="btn btn-success">Enviar</button>
+            </form>
+            
+            <h1 id="bigWarning"></h1>
+            <h3 id="smallerWarning"></h3>
+        </section>
+
+        <section id="transactions" class="">
+            <h2 id="transactions__title">Importações realizadas anteriormente</h1>
+        
+            <table id="transactions__table" class="table table-striped">
+                <thead>
+                    <tr>
+                       <th>Datas das transações</th>
+                       <th>Datas de importação</th>
+                       <th>Importado por</th>
+                    </tr>
+                </thead>
+                <tbody id="transactions__table-body"></tbody>
+            </table>
+        </section>
+    </main>
+    
+    <script>
+        // Selecting all necessary elements
+        const logoutBtn = document.querySelector('#logoutBtn');
+        const mainText = document.querySelector('#mainText');
+        const bigWarning = document.querySelector('#bigWarning');
+        const smallerWarning = document.querySelector('#smallerWarning');
+        const uploadFile = document.querySelector('#form__uploadFile');
+        const submitButton = document.querySelector('#submitButton');
+        const transactions = document.querySelector('#transactions');
+        const transactionsTitle = document.querySelector('#transactions__title');
+        const transactions__table = document.querySelector('#transactions__table');
+        const transactionsTableBody = document.querySelector('#transactions__table-body');
+    </script>
+
+    <script>
+        // Declaring non-event functions
+
+        function fillTable(imports) {
+            imports.forEach(imp => {
+                const tr = document.createElement('tr');
+                const tdTransactionDate = document.createElement('td');
+                const tdImportDate = document.createElement('td');
+                const tdImportedBy = document.createElement('td');
+
+                tdTransactionDate.textContent = new Date(imp.datetime).toLocaleDateString();
+                tdImportDate.textContent = new Date(imp.importedAt).toLocaleString();
+                tdImportedBy.textContent = imp.user.name;
+                tr.appendChild(tdTransactionDate)
+                tr.appendChild(tdImportDate)
+                tr.appendChild(tdImportedBy)
+                transactionsTableBody.appendChild(tr);
+            });
+        }
+
+        function getTransactions() {
+            const headers = { 
+                'Content-Type': 'application/json',
+                'Cookie': document.cookie 
+            };
+            const init = {
+                method:  'get',
+                headers: headers,
+                mode: 'cors'
+            }
+            fetch(`http://localhost:3333/imports`, init)
+            .then(resp => resp.json().then(body => {
+                console.log(body)
+                if (body.length === 0) transactionsTitle.textContent = 'Transações ainda não foram importadas';
+                else fillTable(body);
+            }))
+            .catch(error => console.log(error))
+        } 
+
+        function dataNotValid() {
+            bigWarning.textContent = 'Transações inválidas';
+            smallerWarning.textContent = 'Não há transações registradas.';
+        }
+        
+        function duplicatedData() {
+            bigWarning.textContent = 'Transações inválidas';
+            smallerWarning.textContent = 'O arquivo enviado já foi processado anteriormente.';
+        }
+        
+        function dataIsValid() {
+            bigWarning.textContent = 'Transações salvas com sucesso!';
+            smallerWarning.textContent = '';
+            transactions.style.display = 'block';
+            showTransactionsButton.textContent = 'Esconder Transações';
+        }
+    </script>
+
+    <script>
+        // Defining window's load event
+        window.onload = () => {
+            const queryParams = {}
+            const windowSearch = window.location.search;
+            if(windowSearch) {
+                window.location.search.substring(1).split('&').forEach(item => {
+                    const param = item.split('=');
+                    queryParams[param[0]] = param[1];
+                });
+                const dataIsInvalid = queryParams['valid'] && !Number(queryParams['valid']);
+                const dataIsDuplicate = Number(queryParams['duplicate']);
+                if (dataIsInvalid) dataNotValid();
+                else if (dataIsDuplicate) duplicatedData();
+                else dataIsValid();
+            }
+            getTransactions();
+        }
+    </script>
+    
+    <script>
+        logoutBtn.addEventListener('click', () => {
+            fetch(`http://localhost:3333/users/logout`)
+            .then(resp => {
+                if(resp.status === 200) window.location.replace('/');
+            })
+            .catch(error => console.log(error));
+        })
+    </script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"
+    ></script>
+</body>
+</html>

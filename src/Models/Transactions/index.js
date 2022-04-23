@@ -1,3 +1,3 @@
 const Transactions = require("./transactions");
 
-module.exports = { Transactions };
+module.exports = Transactions;

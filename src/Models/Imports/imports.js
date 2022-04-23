@@ -7,17 +7,25 @@ class Imports {
         this.importedAt = new Date();
     }
 
-    register() {
+    register(userId) {
         return imports.create({
             data: {
                 datetime: this.datetime,
-                importedAt: this.importedAt
+                importedAt: this.importedAt,
+                userId: userId
             }
         });
     }
 
-    static list() {
-        return imports.findMany({
+    static async list() {
+        return await imports.findMany({
+            include: {
+                user: {
+                    select: {
+                        name: true
+                    }
+                }
+            },
             orderBy: {
                 datetime: 'desc'
             }
