@@ -14,8 +14,8 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-md navbar-light bg-light">
-            <div class="container-fluid">
+        <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+            <div class="container-md">
                 <div class="navbar-nav flex-row gap-2">
                     <a class="nav-link" href="/reports">Transações</a>
                     <a class="nav-link" aria-current="page" href="/admin">Usuários</a>
@@ -25,7 +25,7 @@
         </nav>
     </header>
 
-    <main class="container mt-2">        
+    <main class="container-md mt-2">        
         <!-- Register User Form -->
         <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog">
@@ -67,40 +67,31 @@
         <!-- End Register User Form -->
         <div id="warning" class="alert mt-2" role="alert" style="display: none;"></div>
 
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+        <button type="button" class="btn btn-primary my-3" data-bs-toggle="modal" data-bs-target="#exampleModal">
             Novo Usuário
         </button>
 
-        <section id="users" class="mt-2">
+        <section id="users">
             <h2 id="users__title">Usuário cadastrados</h2>
-            
-            <table id="users__table" class="table table-striped">
-                <thead>
-                    <tr>
-                       <th>ID</th>
-                       <th>Nome</th>
-                       <th>Email</th>
-                       <th>Opções</th>
-                    </tr>
-                </thead>
-                <tbody id="users__table-body"></tbody>
-            </table>
+            <div class="overflow-auto">
+                <table id="users__table" class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Email</th>
+                            <th>Opções</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users__table-body"></tbody>
+                </table>
+            </div>
         </section>
     </main>
 
     <script>
         // Selecting all necessary elements
-        let loggedUser = JSON.parse(localStorage.getItem('user'));
-        const logoutBtn = document.querySelector('#logoutBtn');
         const registerForm = document.querySelector('#registerForm');
-        const submitButton = document.querySelector('#submitButton');
-        const nivelSelect = document.querySelector('#role');
-        const warning = document.querySelector('#warning');
-        const users = document.querySelector('#users');
-        const usersTitle = document.querySelector('#users__title');
-        const usersWarning = document.querySelector('#users__warning');
-        const usersTable = document.querySelector('#users__table');
-        const usersTableBody = document.querySelector('#users__table-body');
     </script>
 
     <script>
@@ -116,7 +107,8 @@
                     .join(' ');
         }
 
-        function fillRolesSelect(roles) {
+        function fillRolesSelect(roles) {   
+            const nivelSelect = document.querySelector('#role');
             roles.forEach(role => {
                 const option = document.createElement('option');
 
@@ -149,7 +141,8 @@
 
                 return options;
             }
-
+            
+            const usersTableBody = document.querySelector('#users__table-body');
             users.forEach(user => {
                 if(user.roleId !== 1) return;
                 const tr = document.createElement('tr');
@@ -182,23 +175,15 @@
                 mode: 'cors'
             }
             fetch(`http://localhost:3333/users`, init)
-            .then(resp => resp.json().then(body => {
-                if (body.length === 0) {
-                    usersTable.style.display = 'none';
-                    usersTitle.textContent = 'Ainda não há usuários cadastrados';
-                } else {
-                    usersTable.style.display = '';
-                    fillUsersTable(body);
-                }
-            }))
-            .catch(error => console.log(error))
+            .then(resp => resp.json().then(body => fillUsersTable(body)))
+            .catch(error => console.log(error));
         } 
 
         function deleteUser(id) {
             fetch(`http://localhost:3333/users/${id}`, { method: 'delete' })
             .then(resp => {
-                if(resp.status === 200) window.location = '/admin?delete=1'
-                else if(resp.status === 400) selfUserDelete();
+                if(resp.status === 200) window.location = '/admin?deleted=1'
+                else if(resp.status === 400) showAlert('warning', 'Você não pode se auto deletar!');
             })
             .catch(error => console.log(error));
         }
@@ -211,9 +196,7 @@
                 mode: 'cors'
             }
             fetch(`http://localhost:3333/roles`, init)
-            .then(resp => resp.json().then(response => {
-                fillRolesSelect(response);
-            }))
+            .then(resp => resp.json().then(response => fillRolesSelect(response)))
             .catch(error => console.log(error))
         } 
         
@@ -223,40 +206,28 @@
             name.value = user.name;
             role.value = user.roleId;
             email.value = user.email;
-            submitButton.textContent = 'Editar';
+            submitButton.textContent = 'Salvar';
         }
 
-        function duplicatedUser() {
+        function showAlert(type, message) {
+            const warning = document.querySelector('#warning');
             warning.style.display='';
-            warning.classList.toggle('alert-warning');
-            warning.textContent='Já existe um usuário cadastrado com este e-mail.';
-        }
-        
-        function dataIsValid(modifier) {
-            warning.style.display ='';
-            warning.classList.toggle('alert-success');
-            if(modifier === 'delete') warning.textContent = 'Usuário deletado com sucesso!';
-            else if(modifier === 'update') warning.textContent = 'Usuário editado com sucesso!';
-            else warning.textContent =  'Usuário registrado com sucesso!';
-        }
-        
-        function selfUserDelete() {
-            warning.style.display ='';
-            warning.classList.toggle('alert-warning');
-            warning.textContent = 'Você não pode se auto deletar!';
+            warning.classList.toggle(`alert-${type}`);
+            warning.textContent=message;
+            window.setTimeout(() => {
+                warning.style.display = 'none';
+            }, 5000);
         }
     
         function getQueryParams() {
             const queryParams = {}
             const windowSearch = window.location.search;
-            if(windowSearch) {
-                window.location.search.substring(1).split('&').forEach(item => {
-                    const param = item.split('=');
-                    queryParams[param[0]] = param[1];
-                });
-                return queryParams;
-            }
-            else return false;
+            if(!windowSearch) return false;
+            windowSearch.substring(1).split('&').forEach(item => {
+                const param = item.split('=');
+                queryParams[param[0]] = param[1];
+            });
+            return queryParams;
         }
     </script>
 
@@ -265,13 +236,14 @@
         window.onload = () => {
             const queryParams = getQueryParams();
             if(queryParams) {
-                const dataIsDuplicate = queryParams['duplicate'] && Number(queryParams['duplicate']);
-                const deleteSuccess = queryParams['delete'] && Number(queryParams['delete']);
-                const updateSuccess = queryParams['updateSuccess'] && Number(queryParams['updateSuccess']);
-                if(dataIsDuplicate) duplicatedUser();
-                else if(deleteSuccess) dataIsValid('delete');
-                else if(updateSuccess) dataIsValid('update');
-                else dataIsValid();
+                const { duplicate, deleted, updated } = queryParams;
+                let alertType = !duplicate ? 'success' : 'warning';
+                let alertMessage = 'Usuário registrado com sucesso!';
+
+                if(Number(duplicate)) alertMessage = 'Já existe um usuário cadastrado com este e-mail.';
+                else if(Number(deleted)) alertMessage = 'Usuário deletado com sucesso!';
+                else if(Number(updated)) alertMessage = 'Alterações salvas com sucesso!';
+                showAlert(alertType, alertMessage);
             }
             getUsers();
             getRoles();
@@ -280,47 +252,61 @@
     
     <script>
         // Defining Form's submit event
+        const submitButton = document.querySelector('#submitButton');
         submitButton.addEventListener('click', event => {
-            // event.preventDefault();
-            const formAlert = document.querySelector('#formAlert');
-            const { id, role, name, email } = registerForm.elements;
-            const editUser = event.target.textContent === 'Editar';
-            if (role.value === '0') {
+            function showFormAlert() {
                 formAlert.style.display = '';
                 formAlert.textContent = 'Selecione um nível de acesso.';
-                return
+                window.setTimeout(() => {
+                    formAlert.style.display = 'none';
+                }, 5000);
             }
+            
+            function makeRequest(url, method, body) {
+                const headers = { 'Content-Type': 'application/json' };
+                const init = {
+                    method: method,
+                    headers: headers,
+                    mode: 'cors',
+                    body: JSON.stringify(body)
+                };
+                fetch(url, init)
+                .then(resp => {
+                    if(resp.status === 200) window.location = redirect;
+                })
+                .catch(error => console.log(error));
+            }
+
+            const formAlert = document.querySelector('#formAlert');
+            const { id, role, name, email } = registerForm.elements;
+            if (role.value === '0') return showFormAlert();
+            
             let url = 'http://localhost:3333/users';
             let method = 'post';
             let redirect = '/admin?success=1';
+            const editUser = event.target.textContent === 'Salvar';
 
             if (editUser) {
                 url += `/update/${id.value}`;
                 method = 'put';
-                redirect = '/admin?updateSuccess=1'
+                redirect = redirect.replace('success', 'updated');
             }
 
-            const headers = { 'Content-Type': 'application/json' };
-            const init = {
-                method: method,
-                headers: headers,
-                mode: 'cors',
-                body: JSON.stringify({
+            makeRequest(
+                url, 
+                method, 
+                {
                     name: name.value,
                     email: email.value,
                     role: role.value
-                })
-            }
-            fetch(url, init)
-            .then(resp => {
-                if(resp.status === 200) window.location = redirect;
-            })
-            .catch(error => console.log(error))
+                }
+            );
         })
     </script>
 
     <script>
         // logout Event
+        const logoutBtn = document.querySelector('#logoutBtn');
         logoutBtn.addEventListener('click', () => {
             fetch(`http://localhost:3333/users/logout`)
             .then(resp => {

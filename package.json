@@ -6,7 +6,6 @@
   "scripts": {
     "start": "nodemon index.js",
     "test": "jest",
-    "migrate": "npx prisma migrate dev",
     "seed": "node prisma/seed.js"
   },
   "author": "",

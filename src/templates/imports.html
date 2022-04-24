@@ -15,8 +15,8 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-md navbar-light bg-light">
-            <div class="container-fluid">
+        <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+            <div class="container-md">
                 <div class="navbar-nav flex-row gap-2">
                     <a class="nav-link" href="/reports">Transações</a>
                     <a class="nav-link" aria-current="page" href="/admin">Usuários</a>
@@ -26,69 +26,57 @@
         </nav>
     </header>
 
-    <main class="container">
-        <section class="w-75 mb-5">
-            <h1 id="mainText">Enviar transações</h1>
-        
+    <main class="container-md">
+        <div id="warning" class="alert mt-2" role="alert" style="display: none;"></div>
+
+        <section class="my-3">
+            <h1>Enviar transações</h1>
             <form class="mb-3" method="post" enctype="multipart/form-data" action="upload">
-                <div class="mb-3" id="form__uploadFile">
+                <div class="mb-3">
                     <label for="formFile" class="form-label">Selecione o arquivo csv desejado</label>
                     <input class="form-control" type="file" id="formFile" name="transactions" required>      
                 </div>
-
                 <button id="submitButton" type="submit" class="btn btn-success">Enviar</button>
             </form>
-            
-            <h1 id="bigWarning"></h1>
-            <h3 id="smallerWarning"></h3>
         </section>
 
-        <section id="transactions" class="">
+        <section>
             <h2 id="transactions__title">Importações realizadas anteriormente</h1>
-        
-            <table id="transactions__table" class="table table-striped">
-                <thead>
-                    <tr>
-                       <th>Datas das transações</th>
-                       <th>Datas de importação</th>
-                       <th>Importado por</th>
-                       <th>Opções</th>
-                    </tr>
-                </thead>
-                <tbody id="transactions__table-body"></tbody>
-            </table>
+            <div class="overflow-auto">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th class="text-center align-middle">Datas das transações</th>
+                            <th class="text-center align-middle">Datas de importação</th>
+                            <th class="text-center align-middle">Importado por</th>
+                            <th class="text-center align-middle">Opções</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactions__table-body"></tbody>
+                </table>
+            </div>
         </section>
     </main>
     
     <script>
         // Selecting all necessary elements
-        const logoutBtn = document.querySelector('#logoutBtn');
-        const mainText = document.querySelector('#mainText');
-        const bigWarning = document.querySelector('#bigWarning');
-        const smallerWarning = document.querySelector('#smallerWarning');
-        const uploadFile = document.querySelector('#form__uploadFile');
         const submitButton = document.querySelector('#submitButton');
-        const transactions = document.querySelector('#transactions');
-        const transactionsTitle = document.querySelector('#transactions__title');
-        const transactions__table = document.querySelector('#transactions__table');
         const transactionsTableBody = document.querySelector('#transactions__table-body');
     </script>
 
     <script>
         // Declaring non-event functions
-
         function fillTable(imports) {
-            function returnDetails(imp) {
+            function returnDetailsBtn(imp) {
                 const tdDetails = document.createElement('td');
                 const detailsBtn = document.createElement('button');
 
                 detailsBtn.textContent = 'Detalhes';
                 detailsBtn.classList = 'btn btn-info';
-
                 detailsBtn.addEventListener('click', () => window.location = `/report/${imp.id}`);
 
+                tdDetails.classList = 'text-center align-middle'
                 tdDetails.appendChild(detailsBtn);
-
                 return tdDetails;
             }
 
@@ -102,14 +90,12 @@
                 tdImportDate.textContent = new Date(imp.importedAt).toLocaleString();
                 tdImportedBy.textContent = imp.user.name;
 
-                tdTransactionDate.classList = 'align-middle';
-                tdImportDate.classList = 'align-middle';
-                tdImportedBy.classList = 'align-middle';
-
-                tr.appendChild(tdTransactionDate);
-                tr.appendChild(tdImportDate);
-                tr.appendChild(tdImportedBy);
-                tr.appendChild(returnDetails(imp));
+                const elements = [ tdTransactionDate, tdImportDate, tdImportedBy ];
+                elements.forEach(elem => {
+                    elem.classList = 'text-center align-middle';
+                    tr.appendChild(elem);
+                });
+                tr.appendChild(returnDetailsBtn(imp));
                 transactionsTableBody.appendChild(tr);
             });
         }
@@ -120,53 +106,62 @@
                 method:  'get',
                 headers: headers,
                 mode: 'cors'
-            }
+            };
             fetch(`http://localhost:3333/imports`, init)
             .then(resp => resp.json().then(body => {
-                if (body.length === 0) transactionsTitle.textContent = 'Transações ainda não foram importadas';
-                else fillTable(body);
+                if (body.length === 0) {
+                    const transactionsTitle = document.querySelector('#transactions__title');
+                    transactionsTitle.textContent = 'Transações ainda não foram importadas';
+                    return;
+                }
+                fillTable(body);
             }))
             .catch(error => console.log(error))
         } 
 
-        function dataNotValid() {
-            bigWarning.textContent = 'Transações inválidas';
-            smallerWarning.textContent = 'Não há transações registradas.';
+        function showAlert(type, message) {
+            const warning = document.querySelector('#warning');
+            warning.style.display='';
+            warning.classList.toggle(`alert-${type}`);
+            warning.textContent=message;
+            window.setTimeout(() => {
+                warning.style.display = 'none';
+            }, 5000);
         }
-        
-        function duplicatedData() {
-            bigWarning.textContent = 'Transações inválidas';
-            smallerWarning.textContent = 'O arquivo enviado já foi processado anteriormente.';
-        }
-        
-        function dataIsValid() {
-            bigWarning.textContent = 'Transações salvas com sucesso!';
-            smallerWarning.textContent = '';
-            transactions.style.display = 'block';
+   
+        function getQueryParams() {
+            const queryParams = {}
+            const windowSearch = window.location.search;
+            if(!windowSearch) return false;
+            windowSearch.substring(1).split('&').forEach(item => {
+                const param = item.split('=');
+                queryParams[param[0]] = param[1];
+            });
+            return queryParams;
         }
     </script>
 
     <script>
         // Defining window's load event
         window.onload = () => {
-            const queryParams = {}
-            const windowSearch = window.location.search;
-            if(windowSearch) {
-                window.location.search.substring(1).split('&').forEach(item => {
-                    const param = item.split('=');
-                    queryParams[param[0]] = param[1];
-                });
-                const dataIsInvalid = queryParams['valid'] && !Number(queryParams['valid']);
-                const dataIsDuplicate = Number(queryParams['duplicate']);
-                if (dataIsInvalid) dataNotValid();
-                else if (dataIsDuplicate) duplicatedData();
-                else dataIsValid();
+            const queryParams = getQueryParams();
+            if(queryParams) {
+                const { valid, duplicate } = queryParams;
+                let alertType = !duplicate ? 'success' : 'warning';
+                let alertMessage = 'Transações salvas com sucesso!';
+                if (duplicate) alertMessage = 'O arquivo enviado já foi processado anteriormente.';
+                else if (!Number(valid)) {
+                    alertType = 'danger';
+                    alertMessage = 'Transações inválidas. Não há transações registradas.'
+                }
+                showAlert(alertType, alertMessage);
             }
             getTransactions();
         }
     </script>
     
     <script>
+        const logoutBtn = document.querySelector('#logoutBtn');
         logoutBtn.addEventListener('click', () => {
             fetch(`http://localhost:3333/users/logout`)
             .then(resp => {
@@ -175,6 +170,7 @@
             .catch(error => console.log(error));
         })
     </script>
+
     <script
         src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
