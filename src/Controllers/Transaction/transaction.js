@@ -10,14 +10,11 @@ class TransactionController {
                 console.log('Não existem transações registradas no arquivo enviado.');
                 return res.redirect('/reports?valid=0');
             }
-
-            const imports = new Imports(getTransactionTime(data[0].datetime));            
-            await imports.register(req.session.user.id);
             data.forEach(async transaction => {
                 printTransaction(transaction);
                 await transaction.register();
             })
-            return res.redirect(`/reports?valid=1`);
+            return res.redirect(`/imports/register/${data[0].datetime}`);
         } catch (error) {
             console.log(error);
             deleteCSV(filename);
