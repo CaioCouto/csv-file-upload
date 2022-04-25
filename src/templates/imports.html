@@ -27,7 +27,7 @@
     </header>
 
     <main class="container-md">
-        <div id="warning" class="alert mt-2" role="alert" style="display: none;"></div>
+        <div id="alert" class="alert mt-2" role="alert" style="display: none;"></div>
 
         <section class="my-3">
             <h1>Enviar transações</h1>
@@ -57,50 +57,15 @@
             </div>
         </section>
     </main>
+
+    <script src="/static/js/logout.js"></script>
+    <script src="/static/js/showAlert.js"></script>
+    <script src="/static/js/getQueryParams.js"></script>
+    <script src="/static/js/imports/fillTable.js"></script>
     
     <script>
-        // Selecting all necessary elements
-        const submitButton = document.querySelector('#submitButton');
-        const transactionsTableBody = document.querySelector('#transactions__table-body');
-    </script>
-
-    <script>
         // Declaring non-event functions
-        function fillTable(imports) {
-            function returnDetailsBtn(imp) {
-                const tdDetails = document.createElement('td');
-                const detailsBtn = document.createElement('button');
-
-                detailsBtn.textContent = 'Detalhes';
-                detailsBtn.classList = 'btn btn-info';
-                detailsBtn.addEventListener('click', () => window.location = `/report/${imp.id}`);
-
-                tdDetails.classList = 'text-center align-middle'
-                tdDetails.appendChild(detailsBtn);
-                return tdDetails;
-            }
-
-            imports.forEach(imp => {
-                const tr = document.createElement('tr');
-                const tdTransactionDate = document.createElement('td');
-                const tdImportDate = document.createElement('td');
-                const tdImportedBy = document.createElement('td');
-
-                tdTransactionDate.textContent = new Date(imp.datetime).toLocaleDateString();
-                tdImportDate.textContent = new Date(imp.importedAt).toLocaleString();
-                tdImportedBy.textContent = imp.user.name;
-
-                const elements = [ tdTransactionDate, tdImportDate, tdImportedBy ];
-                elements.forEach(elem => {
-                    elem.classList = 'text-center align-middle';
-                    tr.appendChild(elem);
-                });
-                tr.appendChild(returnDetailsBtn(imp));
-                transactionsTableBody.appendChild(tr);
-            });
-        }
-
-        function getTransactions() {
+        function getImports() {
             const headers = { 'Content-Type': 'application/json'};
             const init = {
                 method:  'get',
@@ -109,36 +74,15 @@
             };
             fetch(`http://localhost:3333/imports`, init)
             .then(resp => resp.json().then(body => {
-                if (body.length === 0) {
-                    const transactionsTitle = document.querySelector('#transactions__title');
-                    transactionsTitle.textContent = 'Transações ainda não foram importadas';
-                    return;
+                if (body.length !== 0) {        
+                    const transactionsTableBody = document.querySelector('#transactions__table-body');
+                    fillTable(transactionsTableBody, body);
                 }
-                fillTable(body);
+                const transactionsTitle = document.querySelector('#transactions__title');
+                transactionsTitle.textContent = 'Transações ainda não foram importadas';
             }))
-            .catch(error => console.log(error))
+            .catch(error => console.log(error));
         } 
-
-        function showAlert(type, message) {
-            const warning = document.querySelector('#warning');
-            warning.style.display='';
-            warning.classList.toggle(`alert-${type}`);
-            warning.textContent=message;
-            window.setTimeout(() => {
-                warning.style.display = 'none';
-            }, 5000);
-        }
-   
-        function getQueryParams() {
-            const queryParams = {}
-            const windowSearch = window.location.search;
-            if(!windowSearch) return false;
-            windowSearch.substring(1).split('&').forEach(item => {
-                const param = item.split('=');
-                queryParams[param[0]] = param[1];
-            });
-            return queryParams;
-        }
     </script>
 
     <script>
@@ -154,21 +98,11 @@
                     alertType = 'danger';
                     alertMessage = 'Transações inválidas. Não há transações registradas.'
                 }
-                showAlert(alertType, alertMessage);
+                const pageAlert = document.querySelector('#alert');
+                showAlert(pageAlert, alertType, alertMessage);
             }
-            getTransactions();
+            getImports();
         }
-    </script>
-    
-    <script>
-        const logoutBtn = document.querySelector('#logoutBtn');
-        logoutBtn.addEventListener('click', () => {
-            fetch(`http://localhost:3333/users/logout`)
-            .then(resp => {
-                if(resp.status === 200) window.location.replace('/');
-            })
-            .catch(error => console.log(error));
-        })
     </script>
 
     <script

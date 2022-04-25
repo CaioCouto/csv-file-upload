@@ -28,7 +28,10 @@
 
     <main class="container-md">
         <section class="mb-5">
-            <h1>Detalhes da Importação</h1>
+            <article class="d-flex align-items-center">
+                <button id="goBackBtn" class="btn btn-primary me-2">Voltar</button>
+                <h1>Detalhes da Importação</h1>
+            </article>
 
             <article class="col-12 col-lg-8">
                 <div class="mb-3 row">
@@ -77,56 +80,14 @@
         </section>
     </main>
 
+    <script src="/static/js/logout.js"></script>
+    <script src="/static/js/getQueryParams.js"></script>
+    <script src="/static/js/details/goBack.js"></script>
+    <script src="/static/js/details/fillTable.js"></script>
+    <script src="/static/js/details/fillImportDescription.js"></script>
+
     <script>
         // Declaring non-event functions
-        function fillImportDescription(imports) {
-            const importDate = document.querySelector('#importDate');
-            const transactionDate = document.querySelector('#transactionDate');
-            const importedBy = document.querySelector('#importedBy');
-
-            importDate.value = new Date(imports.importedAt).toLocaleString();
-            transactionDate.value = new Date(imports.datetime).toLocaleDateString();
-            importedBy.value = `${imports.user.name} (${imports.user.email})`;
-        }
-
-        function fillTransactionsTable(transactions) {
-            const transactionsTableBody = document.querySelector('#transactions__table-body');
-            transactions.forEach(transaction => {
-                const tr = document.createElement('tr');
-                const tdOriginBank = document.createElement('td');
-                const tdOriginAgency = document.createElement('td');
-                const tdOriginAccount = document.createElement('td');
-                const tdDestinationBank = document.createElement('td');
-                const tdDestinationAgency = document.createElement('td');
-                const tdDestinationAccount = document.createElement('td');
-                const tdValue = document.createElement('td');
-
-                tdOriginBank.textContent = transaction.originBank;
-                tdOriginAgency.textContent = transaction.originAgency;
-                tdOriginAccount.textContent = transaction.originAccount;
-                tdDestinationBank.textContent = transaction.destinationBank;
-                tdDestinationAgency.textContent = transaction.destinationAgency;
-                tdDestinationAccount.textContent = transaction.destinationAccount;
-                tdValue.textContent = 'R$ ' + Number(transaction.amount).toFixed(2);
-
-                const elements = [ 
-                    tdOriginBank,
-                    tdOriginAgency,
-                    tdOriginAccount,
-                    tdDestinationBank,
-                    tdDestinationAgency,
-                    tdDestinationAccount,
-                    tdValue
-                ];
-
-                elements.forEach(td => {
-                    td.classList = 'align-middle text-center';
-                    tr.appendChild(td);
-                });
-                transactionsTableBody.appendChild(tr);
-            });
-        }
-
         function getTransactions(datetime) {
             datetime = datetime.split('T')[0];
             const init = {
@@ -163,18 +124,7 @@
             getImportById(importId);
         }
     </script>
-    
-    <script>
-        // logout event
-        const logoutBtn = document.querySelector('#logoutBtn');
-        logoutBtn.addEventListener('click', () => {
-            fetch(`http://localhost:3333/users/logout`)
-            .then(resp => {
-                if(resp.status === 200) window.location.replace('/');
-            })
-            .catch(error => console.log(error));
-        })
-    </script>
+
     <script
         src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"

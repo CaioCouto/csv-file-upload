@@ -77,10 +77,11 @@
                 <table id="users__table" class="table table-striped">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Nome</th>
-                            <th>Email</th>
-                            <th>Opções</th>
+                            <th class="text-center align-middle">ID</th>
+                            <th class="text-center align-middle">Nome</th>
+                            <th class="text-center align-middle">Email</th>
+                            <th class="text-center align-middle">Status</th>
+                            <th class="text-center align-middle">Opções</th>
                         </tr>
                     </thead>
                     <tbody id="users__table-body"></tbody>
@@ -89,84 +90,20 @@
         </section>
     </main>
 
+    <script src="/static/js/logout.js"></script>
+    <script src="/static/js/showAlert.js"></script>
+    <script src="/static/js/getQueryParams.js"></script>
+    <script src="/static/js/admin/fillUsersTable.js"></script>
+    <script src="/static/js/admin/fillRolesSelect.js"></script>
+
     <script>
         // Selecting all necessary elements
         const registerForm = document.querySelector('#registerForm');
+        const warning = document.querySelector('#warning');
     </script>
 
     <script>
         // Declaring non-event functions
-        function capitalize(word) {
-            return word
-                    .trim()
-                    .replaceAll(/\s{2,}/g, ' ')
-                    .split(' ')
-                    .map(word => (
-                        word.substring(0,1).toUpperCase() + word.substring(1)
-                    ))
-                    .join(' ');
-        }
-
-        function fillRolesSelect(roles) {   
-            const nivelSelect = document.querySelector('#role');
-            roles.forEach(role => {
-                const option = document.createElement('option');
-
-                option.value = role.id
-                option.textContent = capitalize(role.role);
-                nivelSelect.appendChild(option);
-            });
-        }
-
-        function fillUsersTable(users) {
-            function getOptionsTD(user) {
-                const options = document.createElement('td');
-                const deleteBtn =  document.createElement('button');
-                const editBtn = document.createElement('button');
-
-                deleteBtn.textContent = 'Apagar';
-                editBtn.textContent = 'Editar';
-                deleteBtn.classList = 'btn btn-danger';
-                editBtn.classList = 'btn btn-success';
-
-                editBtn.setAttribute('data-bs-toggle','modal');
-                editBtn.setAttribute('data-bs-target','#exampleModal');
-
-                options.appendChild(editBtn);
-                options.appendChild(deleteBtn);
-                options.classList = 'd-flex flex-wrap gap-2';
-
-                deleteBtn.addEventListener('click', () => deleteUser(user.id));
-                editBtn.addEventListener('click', () => fillUserUpdateForm(user));
-
-                return options;
-            }
-            
-            const usersTableBody = document.querySelector('#users__table-body');
-            users.forEach(user => {
-                if(user.roleId !== 1) return;
-                const tr = document.createElement('tr');
-                const tdID = document.createElement('td');
-                const tdName = document.createElement('td');
-                const tdEmail = document.createElement('td');
-                
-                tdID.textContent = user.id;
-                tdEmail.textContent = user.email;
-                tdName.textContent = capitalize(user.name);
-                tdName.textContent += user.deleted ? ' (Desativado)' : '';
-
-                tdID.classList = 'align-middle';
-                tdEmail.classList = 'align-middle';
-                tdName.classList = 'align-middle';
-                
-                tr.appendChild(tdID);
-                tr.appendChild(tdName);
-                tr.appendChild(tdEmail);
-                tr.appendChild(getOptionsTD(user));
-                usersTableBody.appendChild(tr);
-            });
-        }
-
         function getUsers() {
             const headers = { 'Content-Type': 'application/json' };
             const init = {
@@ -183,7 +120,7 @@
             fetch(`http://localhost:3333/users/${id}`, { method: 'delete' })
             .then(resp => {
                 if(resp.status === 200) window.location = '/admin?deleted=1'
-                else if(resp.status === 400) showAlert('warning', 'Você não pode se auto deletar!');
+                else if(resp.status === 400) showAlert(warning, 'warning', 'Você não pode se auto deletar!');
             })
             .catch(error => console.log(error));
         }
@@ -208,27 +145,6 @@
             email.value = user.email;
             submitButton.textContent = 'Salvar';
         }
-
-        function showAlert(type, message) {
-            const warning = document.querySelector('#warning');
-            warning.style.display='';
-            warning.classList.toggle(`alert-${type}`);
-            warning.textContent=message;
-            window.setTimeout(() => {
-                warning.style.display = 'none';
-            }, 5000);
-        }
-    
-        function getQueryParams() {
-            const queryParams = {}
-            const windowSearch = window.location.search;
-            if(!windowSearch) return false;
-            windowSearch.substring(1).split('&').forEach(item => {
-                const param = item.split('=');
-                queryParams[param[0]] = param[1];
-            });
-            return queryParams;
-        }
     </script>
 
     <script>
@@ -243,7 +159,7 @@
                 if(Number(duplicate)) alertMessage = 'Já existe um usuário cadastrado com este e-mail.';
                 else if(Number(deleted)) alertMessage = 'Usuário deletado com sucesso!';
                 else if(Number(updated)) alertMessage = 'Alterações salvas com sucesso!';
-                showAlert(alertType, alertMessage);
+                showAlert(warning, alertType, alertMessage);
             }
             getUsers();
             getRoles();
@@ -301,18 +217,6 @@
                     role: role.value
                 }
             );
-        })
-    </script>
-
-    <script>
-        // logout Event
-        const logoutBtn = document.querySelector('#logoutBtn');
-        logoutBtn.addEventListener('click', () => {
-            fetch(`http://localhost:3333/users/logout`)
-            .then(resp => {
-                if(resp.status === 200) window.location.replace('/');
-            })
-            .catch(error => console.log(error));
         })
     </script>
 

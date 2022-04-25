@@ -1,6 +1,8 @@
+const path = require('path');
 const cors = require('cors');
 const express = require('express');
 
+const { getSrcDir } = require('./utils');
 const { session, store } = require('./session');
 const { home, upload, transaction, imports, users, roles } = require('./Views');
 
@@ -12,6 +14,7 @@ app.disable('x-powered-by');
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use('/static', express.static(path.join(getSrcDir(), 'templates', 'static')));
 app.use(session({
     secret: 's3cr3t', // env var
     name: 'sessionId',

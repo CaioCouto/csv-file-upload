@@ -15,7 +15,7 @@
 <body>
     <main class="container-md">
         <h1 class="mb-4">Sistema de Análise de Transações Financeiras</h1>
-        <div id="warning" class="alert alert-warning mt-2" role="alert" style="display: none;"></div>
+        <div id="alert" class="alert alert-warning mt-2" role="alert" style="display: none;"></div>
         <form id="loginForm" class="mb-3" method="post" action="/users/login">
             <div class="mb-3">
                 <label for="email" class="form-label">Email</label>
@@ -31,66 +31,44 @@
         </form>
     </main>
 
-    <script>
-        // Selecting all necessary elements
-        const loginForm = document.querySelector('#loginForm');
-        const warning = document.querySelector('#warning');
-    </script>
-
-    <script>
-        function showAlert(message) {
-            warning.style.display = '';
-            warning.textContent = message;
-        }
+    <script src="/static/js/getQueryParams.js"></script>
+    <script src="/static/js/showAlert.js"></script>
     
-        function getQueryParams() {
-            const queryParams = {}
-            const windowSearch = window.location.search;
-            if(windowSearch) {
-                window.location.search.substring(1).split('&').forEach(item => {
-                    const param = item.split('=');
-                    queryParams[param[0]] = param[1];
-                });
-                return queryParams;
-            }
-            else return false;
-        }
-    </script>
-
     <script>
-        // Defining window's load event
+        const loginAlert = document.querySelector('#alert');
+
+        // Window's load event
         window.onload = () => {
             const queryParams = getQueryParams();
             if(queryParams) {
-                const userIsNotAuthorized = queryParams['auth'] && Number(queryParams['auth']);
-                if (!userIsNotAuthorized) showAlert('Você precisa realizar o login.');
+                const { auth } = queryParams;
+                if (!Number(auth)) showAlert(loginAlert, 'warning', 'Você precisa realizar o login.');
             }
-        }
+        };
     </script>
-
+    
     <script>
-        // Login submit event
+        // Submit Form Event
+        const loginForm = document.querySelector('#loginForm');
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const { email, password } = e.target.elements
-            fetch(
-                'http://localhost:3333/users/login',
-                {
-                    method: 'post',
-                    body: JSON.stringify({
-                        email: email.value,
-                        password: password.value
-                    }),
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                }
-            )
+            const { email, password } = e.target.elements;
+            const init = {
+                method: 'post',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: email.value,
+                    password: password.value
+                }),
+            }
+            fetch('http://localhost:3333/users/login', init)
             .then(resp => {
                 if(resp.status === 200) return window.location.replace('/reports');
-                resp.json().then(body => showAlert(body.message));
-            })
-        })
+                resp.json().then(body => showAlert(loginAlert, 'danger', body.message));
+            });
+        });
     </script>
     
     <script
