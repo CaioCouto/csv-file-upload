@@ -1,5 +1,4 @@
-function fillTransactionsTable(transactions) {
-    const transactionsTableBody = document.querySelector('#transactions__table-body');
+function fillTransactionsTable(transactions, tableBody) {
     transactions.forEach(transaction => {
         const tr = document.createElement('tr');
         const tdOriginBank = document.createElement('td');
@@ -16,7 +15,7 @@ function fillTransactionsTable(transactions) {
         tdDestinationBank.textContent = transaction.destinationBank;
         tdDestinationAgency.textContent = transaction.destinationAgency;
         tdDestinationAccount.textContent = transaction.destinationAccount;
-        tdValue.textContent = 'R$ ' + Number(transaction.amount).toFixed(2);
+        tdValue.textContent = formatBRLMoney(transaction.amount);
 
         const elements = [ 
             tdOriginBank,
@@ -32,6 +31,6 @@ function fillTransactionsTable(transactions) {
             td.classList = 'align-middle text-center';
             tr.appendChild(td);
         });
-        transactionsTableBody.appendChild(tr);
+        tableBody.appendChild(tr);
     });
 }

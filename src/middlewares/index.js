@@ -1,5 +1,7 @@
-const validatesession = require("./ValidateSession");
+const userIsLoggedIn = require("./userIsLoggedIn");
+const validateSession = require("./ValidateSession");
 
 module.exports = {
-    validatesession
+    userIsLoggedIn,
+    validateSession
 };

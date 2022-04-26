@@ -1,12 +1,12 @@
 const router = require('express').Router();
 
-const { validatesession } = require('../../middlewares');
+const { validateSession } = require('../../middlewares');
 const { ImportsController } = require('../../Controllers');
 
-router.use(validatesession);
+router.use(validateSession);
 
-router.get('/imports', validatesession, ImportsController.list);
-router.get('/imports/:id', validatesession,ImportsController.listById);
-router.get('/imports/register/:date', validatesession, ImportsController.create);
+router.get('/imports', ImportsController.list);
+router.get('/imports/:id',ImportsController.listById);
+router.get('/imports/register/:date', ImportsController.create);
 
 module.exports = router;

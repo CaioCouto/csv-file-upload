@@ -1,0 +1,173 @@
+<!DOCTYPE
+    html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+        crossorigin="anonymous"
+    >
+    <title>Upload de CSV</title>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+            <div class="container-md">
+                <div class="navbar-nav flex-row gap-2">
+                    <a class="nav-link" href="/reports">Transações</a>
+                    <a class="nav-link" href="/analysis">Analisador</a>
+                    <a class="nav-link" aria-current="page" href="/admin">Usuários</a>
+                </div>
+                <button id="logoutBtn" class="btn btn-danger" type="button">Sair</button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container-md">
+        <section class="my-3">
+            <h1 class="text-center">Análise de Transações Suspeitas</h1>
+            <form id="analysisForm" class="mb-3 border p-5" method="post" enctype="multipart/form-data" action="/transactions/analyse">
+                <div class="mb-3">
+                    <select id="monthSelect" name="transactionsAnalysis" class="form-select">
+                        <option value="-1">Selecione um mês para realizar a analise</option>
+                    </select>      
+                </div>
+                <button id="submitButton" type="submit" class="btn btn-success">Analisar</button>
+            </form>
+        </section>
+
+        
+        <section id="analyzedTransactions">
+            <h2 id="transactions__title" class="my-3">Resultados</h2>
+            <div id="alert" class="alert mt-2" role="alert" style="display: none;"></div>
+            <!-- Transações Suspeitas -->
+            <div id="suspectTransactions__table" class="suspectTable overflow-auto mb-4">
+                <h3 class="text-center">Transações Suspeitas</h3>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th class="text-center align-middle" colspan="3">Origem</th>
+                            <th class="text-center align-middle" colspan="3">Destino</th>
+                            <th class="text-center align-middle border-bottom border-dark" rowspan="2">Valor</th>
+                        </tr>
+                        <tr>
+                            <th class="text-center align-middle">Banco</th>
+                            <th class="text-center align-middle">Agência</th>
+                            <th class="text-center align-middle">Conta</th>
+                            <th class="text-center align-middle">Banco</th>
+                            <th class="text-center align-middle">Agência</th>
+                            <th class="text-center align-middle">Conta</th>
+                        </tr>
+                    </thead>
+                    <tbody id="suspectTransactions__table-body"></tbody>
+                </table>
+            </div>
+            <!-- Contas Com Movimentações Suspeitas -->
+            <div id="suspectAccounts__table" class="suspectTable overflow-auto mb-4">
+                <h3 class="text-center">Contas Suspeitas</h3>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th class="text-center align-middle">Banco</th>
+                            <th class="text-center align-middle">Agência</th>
+                            <th class="text-center align-middle">Conta</th>
+                            <th class="text-center align-middle">Valor Movimentado</th>
+                            <th class="text-center align-middle">Tipo Movimentação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="suspectAccounts__table-body"></tbody>
+                </table>
+            </div>
+            <!-- Agências Com Movimentações Suspeitas -->
+            <div id="suspectAgencies__table" class="suspectTable overflow-auto">
+                <h3 class="text-center">Agências Suspeitas</h3>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th class="text-center align-middle">Banco</th>
+                            <th class="text-center align-middle">Agência</th>
+                            <th class="text-center align-middle">Valor Movimentado</th>
+                            <th class="text-center align-middle">Tipo Movimentação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="suspectAgencies__table-body"></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script src="/static/js/logout.js"></script>
+    <script src="/static/js/showAlert.js"></script>
+    <script src="/static/js/formatBRLMoney.js"></script>
+    <script src="/static/js/getQueryParams.js"></script>
+    <script src="/static/js/fillTransactionsTable.js"></script>
+    <script src="/static/js/analysis/fillMonthSelect.js"></script>
+    <script src="/static/js/analysis/fillAccountsTable.js"></script>
+    <script src="/static/js/analysis/fillAgenciesTable.js"></script>
+    <script src="/static/js/analysis/isSomethingSuspect.js"></script>
+
+    <script>
+        const suspectTable = document.querySelectorAll('.suspectTable');
+        const transactions__title = document.querySelector('#transactions__title');
+    </script>
+    
+    <script>
+        // Declaring non-event functions
+        function getAnalysedTransactions(month) {
+            const init = {
+                method:  'get',
+                mode: 'cors'
+            };
+            fetch(`http://localhost:3333/transactions/analyse/${month}`, init)
+            .then(resp => {
+                if (resp.status === 200) {
+                    resp.json().then(body => {
+                        transactions__title.textContent = 'Resultados';
+                        transactions__title.classList.remove('text-center');
+                        if (!isSomethingSuspect(body)) return;
+                        suspectTable.forEach(table => table.classList.remove('d-none'));
+                        const suspectTransactionsTableBody = document.querySelector('#suspectTransactions__table-body');
+                        fillAccountsTable(body.suspectAccounts);
+                        fillAgenciesTable(body.suspectAgencies);
+                        fillTransactionsTable(body.suspectTransactions, suspectTransactionsTableBody);
+                    });
+                }
+                else if (resp.status === 404) {
+                    transactions__title.textContent = 'Não há transações importadas para o período selecionado.';
+                    transactions__title.classList.add('text-center');
+                    suspectTable.forEach(table => table.classList.add('d-none'));
+                }
+            });
+        } 
+    </script>
+
+    <script>
+        // Defining window's load event
+        window.onload = () => {
+            suspectTable.forEach(table => table.classList.add('d-none'));
+            transactions__title.textContent = '';
+            fillMonthSelect();
+        };
+    </script>
+
+    <script>
+        const form = document.querySelector('#analysisForm');
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const { monthSelect } = event.target.elements;
+            if(monthSelect.value === '-1') return showAlert(pageAlert, 'warning', 'Selecione um mês para realizar a análise.');
+            getAnalysedTransactions(monthSelect.value);
+        });
+    </script>
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"
+    ></script>
+</body>
+</html>

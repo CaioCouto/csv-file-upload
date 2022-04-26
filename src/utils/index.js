@@ -7,6 +7,7 @@ const csvToObject = require("./csvToObject");
 const printTransaction = require("./printTransaction");
 const getTransactionTime = require("./getTransactionTime");
 const filterTransactions = require("./filterTransactions");
+const analyseTransactions = require("./analyseTransactions");
 const getUploadDestinationDir = require("./getUploadDestinationDir");
 
 
@@ -20,5 +21,6 @@ module.exports = {
     printTransaction,
     getTransactionTime,
     filterTransactions,
+    analyseTransactions,
     getUploadDestinationDir,
 }

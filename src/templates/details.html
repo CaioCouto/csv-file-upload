@@ -19,6 +19,7 @@
             <div class="container-md">
                 <div class="navbar-nav flex-row gap-2">
                     <a class="nav-link" href="/reports">Transações</a>
+                    <a class="nav-link" href="/analysis">Analisador</a>
                     <a class="nav-link" aria-current="page" href="/admin">Usuários</a>
                 </div>
                 <button id="logoutBtn" class="btn btn-danger" type="button">Sair</button>
@@ -58,20 +59,20 @@
         <section id="transactions">
             <h2 id="transactions__title">Transações Importadas</h1>            
             <div class="overflow-auto">
-                <table id="transactions__table" class="table table-bordered table-striped">
+                <table id="transactions__table" class="table table-striped">
                     <thead>
                         <tr>
-                        <th class="text-center align-middle" colspan="3">Origem</th>
-                        <th class="text-center align-middle" colspan="3">Destino</th>
-                        <th class="text-center align-middle" rowspan="2">Valor</th>
+                            <th class="text-center align-middle" colspan="3">Origem</th>
+                            <th class="text-center align-middle" colspan="3">Destino</th>
+                            <th class="text-center align-middle border-bottom border-dark" rowspan="2">Valor</th>
                         </tr>
                         <tr>
-                        <th class="text-center align-middle">Banco</th>
-                        <th class="text-center align-middle">Agência</th>
-                        <th class="text-center align-middle">Conta</th>
-                        <th class="text-center align-middle">Banco</th>
-                        <th class="text-center align-middle">Agência</th>
-                        <th class="text-center align-middle">Conta</th>
+                            <th class="text-center align-middle">Banco</th>
+                            <th class="text-center align-middle">Agência</th>
+                            <th class="text-center align-middle">Conta</th>
+                            <th class="text-center align-middle">Banco</th>
+                            <th class="text-center align-middle">Agência</th>
+                            <th class="text-center align-middle">Conta</th>
                         </tr>
                     </thead>
                     <tbody id="transactions__table-body"></tbody>
@@ -82,8 +83,9 @@
 
     <script src="/static/js/logout.js"></script>
     <script src="/static/js/getQueryParams.js"></script>
+    <script src="/static/js/formatBRLMoney.js"></script>
+    <script src="/static/js/fillTransactionsTable.js"></script>
     <script src="/static/js/details/goBack.js"></script>
-    <script src="/static/js/details/fillTable.js"></script>
     <script src="/static/js/details/fillImportDescription.js"></script>
 
     <script>
@@ -96,7 +98,8 @@
             }
             fetch(`http://localhost:3333/transactions/${datetime}`, init)
             .then(resp => resp.json().then(body => {
-                fillTransactionsTable(body);
+                const transactionsTableBody = document.querySelector('#transactions__table-body');
+                fillTransactionsTable(body, transactionsTableBody);
             }))
             .catch(error => console.log(error))
         } 

@@ -9,7 +9,7 @@ class Transactions {
         this.destinationBank = destinationBank;
         this.destinationAgency = destinationAgency;
         this.destinationAccount = destinationAccount;
-        this.amount = amount;
+        this.amount = parseFloat(amount);
         this.datetime = new Date(datetime);
     }
 

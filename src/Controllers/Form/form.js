@@ -9,7 +9,7 @@ class FormController {
             console.log('File size: ' + fileSizeInBytes + ' B('+ fileSizeInMegaBytes + ' MB)');
             return res.redirect(`/transactions/register?filename=${filename}`);
         }
-        return res.redirect(`/?duplicate=1`);
+        return res.redirect(`/reports?duplicate=1`);
     }
 };
 

@@ -3,16 +3,19 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 async function main() {
-    const roles = [ 'admin', 'user' ];
-    roles.forEach(async role => {
-        await prisma.role.create({
-            data: {
-                role: role
-            }
-        });
-    })
+    const adminRole = await prisma.role.create({
+      data: {
+          role: 'admin'
+      }
+    });
 
-    await prisma.users.create({
+    const userRole = await prisma.role.create({
+      data: {
+          role: 'user'
+      }
+    });
+
+    const admin = await prisma.users.create({
         data: {
           email: 'admin@email.com.br',
           name: 'Admin',
@@ -21,6 +24,11 @@ async function main() {
           password: bcrypt.hashSync('123999', 10)
         },
     });
+
+    console.log('Data created:')
+    console.log(adminRole)
+    console.log(userRole)
+    console.log(admin)
 }
 
 main()

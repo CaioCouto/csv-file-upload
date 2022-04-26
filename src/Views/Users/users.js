@@ -1,15 +1,15 @@
 const router = require('express').Router();
 
 const { UsersController } = require('../../Controllers');
-const { validatesession } = require('../../middlewares');
+const { validateSession } = require('../../middlewares');
 
-router.post('/users', validatesession, UsersController.register);
+router.post('/users', validateSession, UsersController.register);
 router.post('/users/login', UsersController.login);
 
-router.get('/users', validatesession, UsersController.list);
-router.get('/users/logout', validatesession, UsersController.logout);
+router.get('/users', validateSession, UsersController.list);
+router.get('/users/logout', validateSession, UsersController.logout);
 
-router.put('/users/update/:id', validatesession, UsersController.update);
+router.put('/users/update/:id', validateSession, UsersController.update);
 
-router.delete('/users/:id', validatesession, UsersController.delete);
+router.delete('/users/:id', validateSession, UsersController.delete);
 module.exports = router;

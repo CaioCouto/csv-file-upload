@@ -4,7 +4,7 @@ function returnDetailsBtn(imp) {
 
     detailsBtn.textContent = 'Detalhes';
     detailsBtn.classList = 'btn btn-info';
-    detailsBtn.addEventListener('click', () => window.location = `/report/${imp.id}`);
+    detailsBtn.addEventListener('click', () => window.location = `/reports/${imp.id}`);
 
     tdDetails.appendChild(detailsBtn);
     tdDetails.classList = 'text-center align-middle';

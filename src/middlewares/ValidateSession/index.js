@@ -1,3 +1,3 @@
-const validatesession = require("./validatesession");
+const validateSession = require("./validateSession");
 
-module.exports = validatesession;
+module.exports = validateSession;
