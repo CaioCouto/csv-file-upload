@@ -1,17 +1,18 @@
 const { Imports } = require('../../Models');
-const { getTransactionTime } = require('../../utils');
+const { getTransactionTime, deleteFile } = require('../../utils');
 
 class ImportsController {    
     static async create(req, res, next) {
         const { date } = req.params;
+        const { filename } = req.query;
         try {
             const imports = new Imports(getTransactionTime(new Date(date)));            
             await imports.register(req.session.user.id);
-            res.redirect('/reports?valid=1');        
+            return res.redirect('/reports?valid=1');    
         } catch (error) {
             console.log(error);
-            deleteCSV(filename);
-            return res.status(500);
+            deleteFile(filename);
+            return res.redirect(`/transactions/delete?datetime=${getTransactionTime(new Date(date))}`);
         }
     }
     

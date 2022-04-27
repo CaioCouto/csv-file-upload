@@ -48,10 +48,10 @@ class Imports {
         });
     }
     
-    static async listByDatetime(datetime) {
+    static async listByDatetime(datetimeInMilliseconds) {
         return await imports.findUnique({
             where: {
-                datetime:datetime
+                datetime:new Date(datetimeInMilliseconds)
             }
         });
     }

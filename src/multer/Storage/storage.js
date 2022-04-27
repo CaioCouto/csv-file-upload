@@ -1,6 +1,6 @@
 const multer = require("multer");
 
-const { getTodayDate, getUploadDestinationDir } = require("../../utils");
+const { getUploadDestinationDir } = require("../../utils");
 const destinationDir = getUploadDestinationDir();
 
 module.exports = multer.diskStorage({

@@ -91,10 +91,15 @@
         window.onload = () => {
             const queryParams = getQueryParams();
             if(queryParams) {
-                const { valid, duplicate } = queryParams;
+                const { valid, duplicate, internalError } = queryParams;
                 let alertType = !duplicate ? 'success' : 'warning';
                 let alertMessage = 'Transações salvas com sucesso!';
+                console.log(Number(internalError))
                 if (duplicate) alertMessage = 'O arquivo enviado já foi processado anteriormente.';
+                else if (Number(internalError)) {
+                    alertType = 'danger';
+                    alertMessage = 'As transações não foram registradas devido a um erro interno.'
+                }
                 else if (!Number(valid)) {
                     alertType = 'danger';
                     alertMessage = 'Transações inválidas. Não há transações registradas.'

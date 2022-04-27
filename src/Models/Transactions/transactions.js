@@ -41,6 +41,17 @@ class Transactions {
             }
         });
     }
+    
+    static delete(startDate, endDate) {
+        return transactions.deleteMany({
+            where: {
+                datetime: {
+                    gte: startDate,
+                    lt: endDate
+                }
+            }
+        });
+    }
 };
 
 module.exports = Transactions;

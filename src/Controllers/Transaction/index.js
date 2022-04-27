@@ -1,3 +1,3 @@
-const TransactionController = require("./Transaction");
+const TransactionController = require("./transaction");
 
 module.exports = TransactionController;
