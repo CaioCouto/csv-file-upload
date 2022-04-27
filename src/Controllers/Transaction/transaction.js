@@ -1,5 +1,5 @@
-const { Transactions } = require('../../Models');
-const { csvToObject, deleteCSV, printTransaction, analyseTransactions } = require("../../utils");
+const { Transactions, Imports } = require('../../Models');
+const { csvToObject, deleteFile, printTransaction, analyseTransactions, xmlToObject } = require("../../utils");
 
 function getTimeInterval(month) {
     const currentYear = new Date(Date.now()).getFullYear();
@@ -8,21 +8,34 @@ function getTimeInterval(month) {
     return [ startDate, finalDate ];
 }
 
+function isDuplicate(datetime) {
+    return Imports.listByDatetime(datetime);
+}
+
+async function validateData(data, filename, res) {
+    if(!data) return res.redirect('/reports?valid=0');
+    else if (await isDuplicate(data[0].datetime)) {
+        deleteFile(filename); 
+        return res.redirect(`/reports?duplicate=1`);
+    }
+    return true;
+}
+
 class TransactionController {    
     static async register(req, res, next) {
-        const { filename } = req.query;
+        const { filename, fileType } = req.query;
         try {
-            const data = csvToObject(filename);
-            if(!data) return res.redirect('/reports?valid=0');
-            data.forEach(async transaction => {
-                printTransaction(transaction);
-                await transaction.register();
-            });
-            return res.redirect(`/imports/register/${data[0].datetime}`);
+            const data = fileType === 'text/xml' ? xmlToObject(filename) : csvToObject(filename);
+            if(validateData(data, filename, res)) {
+                data.forEach(async transaction => {
+                    printTransaction(transaction);
+                    await transaction.register();
+                });
+                return res.redirect(`/imports/register/${data[0].datetime}`);
+            }
         } catch (error) {
             console.log(error);
-            deleteCSV(filename);
-            if(error.code === 'P2002') return res.redirect(`/reports?duplicate=1`);
+            deleteFile(filename);
             return res.status(500);
         }
     }

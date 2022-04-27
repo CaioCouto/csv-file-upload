@@ -4,9 +4,15 @@ const { getTransactionTime } = require('../../utils');
 class ImportsController {    
     static async create(req, res, next) {
         const { date } = req.params;
-        const imports = new Imports(getTransactionTime(new Date(date)));            
-        await imports.register(req.session.user.id);
-        res.redirect('/reports?valid=1');
+        try {
+            const imports = new Imports(getTransactionTime(new Date(date)));            
+            await imports.register(req.session.user.id);
+            res.redirect('/reports?valid=1');        
+        } catch (error) {
+            console.log(error);
+            deleteCSV(filename);
+            return res.status(500);
+        }
     }
     
     static async list(req, res, next) {

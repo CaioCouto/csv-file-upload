@@ -47,6 +47,14 @@ class Imports {
             }
         });
     }
+    
+    static async listByDatetime(datetime) {
+        return await imports.findUnique({
+            where: {
+                datetime:datetime
+            }
+        });
+    }
 };
 
 module.exports = Imports;

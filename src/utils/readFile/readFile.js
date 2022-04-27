@@ -2,7 +2,7 @@ const path = require('path');
 const { readFileSync } = require('fs');
 const getUploadDestinationDir = require('../getUploadDestinationDir');
 
-function readCSV(filename) {
+function readFile(filename) {
     const uploadDir = getUploadDestinationDir();
     return readFileSync(
         path.join(uploadDir, filename),
@@ -13,4 +13,4 @@ function readCSV(filename) {
     );
 }
 
-module.exports = readCSV;
+module.exports = readFile;

@@ -18,7 +18,8 @@
     "express": "^4.17.3",
     "express-session": "^1.17.2",
     "multer": "^1.4.4",
-    "nodemailer": "^6.7.3"
+    "nodemailer": "^6.7.3",
+    "xml-js": "^1.6.11"
   },
   "devDependencies": {
     "@types/jest": "^27.4.1",
