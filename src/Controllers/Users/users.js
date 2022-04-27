@@ -6,9 +6,11 @@ class UsersController {
     static async register(req, res, next) {
         try {
             const user = new Users(req.body);
-            await user.register();
-            sendMail(user.email, user.password);
-            res.json({});
+            if(await sendMail(user.email, user.password)) {
+                await user.register();
+                return res.json({});
+            }
+            return res.status(500).json({});
         } catch (error) {
             console.log(error);
             if(error.code === 'P2002') {

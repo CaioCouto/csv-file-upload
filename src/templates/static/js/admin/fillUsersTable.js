@@ -32,7 +32,7 @@ function fillUsersTable(users) {
         tdID.textContent = user.id;
         tdEmail.textContent = user.email;
         tdName.textContent = user.name;
-        tdStatus.textContent += user.deleted ? 'Desativo' : 'Ativo';
+        tdStatus.textContent += user.deleted ? 'Desativado' : 'Ativo';
 
         tdID.classList = 'text-center align-middle';
         tdEmail.classList = 'text-center align-middle';
