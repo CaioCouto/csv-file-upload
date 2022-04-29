@@ -25,10 +25,10 @@ async function main() {
         },
     });
 
-    console.log('Data created:')
-    console.log(adminRole)
-    console.log(userRole)
-    console.log(admin)
+    console.log('Data created:');
+    console.log(adminRole);
+    console.log(userRole);
+    console.log(admin);
 }
 
 main()

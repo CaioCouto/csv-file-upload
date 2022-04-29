@@ -5,8 +5,9 @@ const { ImportsController } = require('../../Controllers');
 
 router.use(validateSession);
 
-router.get('/imports', ImportsController.list);
+router.get('/imports/register', ImportsController.create);
 router.get('/imports/:id',ImportsController.listById);
-router.get('/imports/register/:date', ImportsController.create);
+router.get('/imports', ImportsController.list);
+
 
 module.exports = router;

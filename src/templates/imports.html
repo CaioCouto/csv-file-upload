@@ -43,7 +43,7 @@
 
         <section>
             <h2 id="transactions__title">Importações realizadas anteriormente</h1>
-            <div class="overflow-auto">
+            <div id="transactions__list" class="overflow-auto">
                 <table class="table table-striped">
                     <thead>
                         <tr>
@@ -74,14 +74,20 @@
                 mode: 'cors'
             };
             fetch(`http://localhost:3333/imports`, init)
-            .then(resp => resp.json().then(body => {
-                if (body.length !== 0) {        
-                    const transactionsTableBody = document.querySelector('#transactions__table-body');
-                    fillTable(transactionsTableBody, body);
+            .then(resp => {
+                if(resp.status === 200) {
+                    resp.json().then(body => {        
+                        const transactionsTableBody = document.querySelector('#transactions__table-body');
+                        return fillTable(transactionsTableBody, body);
+                    });
+                } 
+                else if(resp.status === 404) {
+                    const transactionsList = document.querySelector('#transactions__list');
+                    const transactionsTitle = document.querySelector('#transactions__title');
+                    transactionsTitle.textContent = 'Transações ainda não foram importadas';
+                    transactionsList.classList.add('d-none');
                 }
-                const transactionsTitle = document.querySelector('#transactions__title');
-                transactionsTitle.textContent = 'Transações ainda não foram importadas';
-            }))
+            })
             .catch(error => console.log(error));
         } 
     </script>

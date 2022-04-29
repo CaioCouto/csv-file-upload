@@ -117,10 +117,10 @@
             .catch(error => console.log(error));
         } 
 
-        function deleteUser(id) {
-            fetch(`http://localhost:3333/users/${id}`, { method: 'delete' })
+        function deleteUser(id, userDeleted) {
+            fetch(`http://localhost:3333/users/${id}?deleted=${userDeleted}`, { method: 'delete' })
             .then(resp => {
-                if(resp.status === 200) return window.location = '/admin?deleted=1'
+                if(resp.status === 200) return window.location = userDeleted ? '/admin?deleted=0' : '/admin?deleted=1'
                 else if(resp.status === 400) return showAlert(warning, 'warning', 'Você não pode se auto deletar!');
             })
             .catch(error => console.log(error));
@@ -159,6 +159,7 @@
 
                 if(Number(duplicate)) alertMessage = 'Já existe um usuário cadastrado com este e-mail.';
                 else if(Number(deleted)) alertMessage = 'Usuário desativado com sucesso!';
+                else if(!Number(deleted)) alertMessage = 'Usuário reativado com sucesso!';
                 else if(Number(updated)) alertMessage = 'Alterações salvas com sucesso!';
                 showAlert(warning, alertType, alertMessage);
             }

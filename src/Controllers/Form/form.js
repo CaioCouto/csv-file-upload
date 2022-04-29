@@ -8,7 +8,7 @@ class FormController {
     
             console.log('File name: ' + filename);
             console.log('File size: ' + fileSizeInBytes + ' B('+ fileSizeInMegaBytes + ' MB)');
-            return res.redirect(`/transactions/register?filename=${filename}&fileType=${fileType}`);
+            return res.redirect(`/imports/register?filename=${filename}&fileType=${fileType}`);
         }
         return res.redirect(`/reports?duplicate=1`);
     }

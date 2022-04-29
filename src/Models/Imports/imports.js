@@ -2,17 +2,18 @@ const { imports } = require("../prisma");
 
 
 class Imports {
-    constructor(datetime) {
-        this.datetime = new Date(datetime);
+    constructor(datetime, userId) {
+        this.userId = userId;
         this.importedAt = new Date();
+        this.datetime = new Date(datetime);
     }
 
-    register(userId) {
+    register() {
         return imports.create({
             data: {
                 datetime: this.datetime,
                 importedAt: this.importedAt,
-                userId: userId
+                userId: this.userId
             }
         });
     }

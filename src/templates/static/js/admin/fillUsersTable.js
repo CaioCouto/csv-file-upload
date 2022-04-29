@@ -2,10 +2,10 @@ function getOptionsTD(user) {
     const options = document.createElement('td');
     const editBtn = document.createElement('button');
     const deleteBtn =  document.createElement('button');
-
-    deleteBtn.textContent = 'Apagar';
+    
+    deleteBtn.textContent = user.deleted ? 'Reativar' : 'Apagar';
     deleteBtn.classList = 'btn btn-danger';
-    deleteBtn.addEventListener('click', () => deleteUser(user.id));
+    deleteBtn.addEventListener('click', () => deleteUser(user.id, user.deleted));
     
     editBtn.textContent = 'Editar';
     editBtn.classList = 'btn btn-success';
@@ -32,7 +32,7 @@ function fillUsersTable(users) {
         tdID.textContent = user.id;
         tdEmail.textContent = user.email;
         tdName.textContent = user.name;
-        tdStatus.textContent += user.deleted ? 'Desativado' : 'Ativo';
+        tdStatus.textContent += user.deleted ? 'Inativo' : 'Ativo';
 
         tdID.classList = 'text-center align-middle';
         tdEmail.classList = 'text-center align-middle';

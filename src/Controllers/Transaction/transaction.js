@@ -1,5 +1,5 @@
-const { Transactions, Imports } = require('../../Models');
-const { csvToObject, deleteFile, printTransaction, analyseTransactions, xmlToObject, getTransactionTime } = require("../../utils");
+const { Transactions } = require('../../Models');
+const { deleteFile, analyseTransactions, printTransaction } = require("../../utils");
 
 function getDayInterval(datetime) {
     const startDatetime = new Date(Number(datetime));
@@ -15,31 +15,16 @@ function getMonthInterval(month) {
     return [ startDate, finalDate ];
 }
 
-function isDuplicate(datetime) {
-    return Imports.listByDatetime(datetime);
-}
-
-async function dataIsValid(data) {
-    const datetimeInMilliseconds = getTransactionTime(new Date(data[0].datetime))
-    if(!data) return 'valid=0';
-    else if (await isDuplicate(datetimeInMilliseconds)) return 'duplicate=1';
-    return true;
-}
-
 class TransactionController {    
     static async register(req, res, next) {
-        const { filename, fileType } = req.query;
+        const { transactions } = req.session;
+        const { filename } = req.query;
         try {
-            const data = fileType === 'text/xml' ? xmlToObject(filename) : csvToObject(filename);
-            const result = await dataIsValid(data);
-            if(typeof(result) !== 'string') {
-                data.forEach(async transaction => {
-                    printTransaction(transaction);
-                    await transaction.register();
-                });
-            }
-            deleteFile(filename);
-            return res.redirect(`/reports?${result}`);
+            transactions.forEach(async transaction => {
+                printTransaction(transaction);
+                await new Transactions(Object.values(transaction)).register();
+            });
+            return res.redirect(`/reports?valid=1`);
         } catch (error) {
             console.log(error);
             deleteFile(filename);
@@ -69,17 +54,6 @@ class TransactionController {
         } catch (error) {
             console.log(error);
             return res.status(500);
-        }
-    }
-    
-    static async delete(req, res, next) {
-        const [ startDate, finalDate ] = getDayInterval(req.query.datetime);
-        try {
-            await Transactions.delete(startDate, finalDate);
-            return res.redirect('/reports?internalError=1');
-        } catch (error) {
-            console.log(error);
-            return res.status(500).json({});
         }
     }
 };

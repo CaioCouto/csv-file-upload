@@ -108,7 +108,6 @@
     <script src="/static/js/analysis/fillMonthSelect.js"></script>
     <script src="/static/js/analysis/fillAccountsTable.js"></script>
     <script src="/static/js/analysis/fillAgenciesTable.js"></script>
-    <script src="/static/js/analysis/isSomethingSuspect.js"></script>
 
     <script>
         const suspectTable = document.querySelectorAll('.suspectTable');
@@ -128,7 +127,6 @@
                     resp.json().then(body => {
                         transactions__title.textContent = 'Resultados';
                         transactions__title.classList.remove('text-center');
-                        if (!isSomethingSuspect(body)) return;
                         suspectTable.forEach(table => table.classList.remove('d-none'));
                         const suspectTransactionsTableBody = document.querySelector('#suspectTransactions__table-body');
                         fillAccountsTable(body.suspectAccounts);
@@ -146,6 +144,25 @@
     </script>
 
     <script>
+        window.onload = () => {
+            const queryParams = getQueryParams();
+            // if(queryParams) {
+            //     const { duplicate, deleted, updated } = queryParams;
+            //     let alertType = !duplicate ? 'success' : 'warning';
+            //     let alertMessage = 'Usuário registrado com sucesso!';
+
+            //     if(Number(duplicate)) alertMessage = 'Já existe um usuário cadastrado com este e-mail.';
+            //     else if(Number(deleted)) alertMessage = 'Usuário desativado com sucesso!';
+            //     else if(!Number(deleted)) alertMessage = 'Usuário reativado com sucesso!';
+            //     else if(Number(updated)) alertMessage = 'Alterações salvas com sucesso!';
+            //     showAlert(warning, alertType, alertMessage);
+            // }
+            // getUsers();
+            // getRoles();
+        }
+    </script>
+
+    <script>
         // Defining window's load event
         window.onload = () => {
             suspectTable.forEach(table => table.classList.add('d-none'));
@@ -160,6 +177,7 @@
             event.preventDefault();
             const { monthSelect } = event.target.elements;
             if(monthSelect.value === '-1') return showAlert(pageAlert, 'warning', 'Selecione um mês para realizar a análise.');
+            suspectTable.forEach(table => table.children[1].children[1].innerHTML = '');
             getAnalysedTransactions(monthSelect.value);
         });
     </script>

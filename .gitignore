@@ -1,3 +1,4 @@
+.env
 node_modules
 prisma/migrations
 *.csv
@@ -6,5 +7,6 @@ prisma/migrations
 
 !transacoes-2022-01-02.csv
 !transacoes-2022-02-02.xml
-# Keep environment variables out of version control
-.env
+!transacoesInválidas-2022-01-02.csv
+!transacoesInválidas-2022-01-02.xml
+

@@ -74,9 +74,10 @@ class UsersController {
     
     static async delete(req, res, next) {
         const { id } = req.params;
+        const deleted = req.query.deleted === 'true';
         if(req.session.user.id === Number(id)) return res.status(400).json({})
         try {
-            const users = await Users.delete(Number(id));
+            const users = await Users.delete(Number(id), deleted);
             return res.json(users);
         } catch (error) {
             console.log(error);

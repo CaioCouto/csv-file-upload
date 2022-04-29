@@ -73,13 +73,13 @@ class Users {
         });
     }
     
-    static async delete(id) {
+    static async delete(id, userDeleted) {
         return await users.update({
             where: {
                 id: id
             },
             data: {
-                deleted: true
+                deleted: !userDeleted
             }
         });
     }
